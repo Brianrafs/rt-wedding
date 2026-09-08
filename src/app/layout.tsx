@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import "./globals.css";
 
-export const metadata: Metadata = {
-  title: "Em breve",
-  robots: { index: false, follow: false },
-};
+// Keep unfinished and future private routes out of search by default.
+export const metadata: Metadata = { robots: { index: false, follow: false } };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <html lang="pt-BR"><body>{children}</body></html>;
+  return (
+    <html lang="pt-BR">
+      <body>{children}</body>
+    </html>
+  );
 }

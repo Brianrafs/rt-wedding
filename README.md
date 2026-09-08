@@ -1,8 +1,39 @@
-# Ryelthon & Thayna — M1 Foundation
+# Ryelthon & Thayna — M2 Public Website
 
-One Next.js App Router application. Only Milestone M1 is implemented.
-The `/` route is a neutral, non-indexed placeholder. Public wedding design,
-RSVP, authentication, admin screens, and deployment are deferred.
+One Next.js App Router application. Milestones M1 and M2 are implemented.
+The `/` route contains the public wedding page with a hero, countdown, event
+details, venue, dress code, photo placeholders, and footer. RSVP, authentication,
+admin screens, and deployment are deferred.
+
+## Public content and M2 boundaries
+
+Confirmed names/date and pending venue/dress-code content live in
+`src/constants/wedding.ts`. The date is December 10, 2026, in America/Fortaleza.
+Until a ceremony time is configured, the countdown targets the beginning of
+that day (`2026-12-10T00:00:00-03:00`) and the page says the time is pending.
+A valid `WEDDING_DATE` with an explicit offset can set the ceremony time; it
+must still fall on the confirmed wedding day in Fortaleza. Changing these
+settings on a deployed static page requires a rebuild.
+
+No venue, address, attire, photos, or permanent visual identity was invented.
+The map link only renders once a real `mapUrl` is supplied. Photo spaces are
+neutral HTML/CSS placeholders, with no external images or broken image requests.
+Replace them with optimized `next/image` assets when the couple supplies photos.
+Bridal and Boheme Floral remain the named typography roles, using system serif
+fallbacks until licensed font files arrive. The supporting font uses a system
+sans-serif fallback until the final choice is confirmed. No font downloads or
+new application dependencies were introduced in M2.
+
+The page/layout remain Server Components; only the countdown is interactive.
+It supports pause/resume, avoids per-second screen-reader announcements, handles
+the reached-date state without negative values, and offers a no-JavaScript
+explanation. An informational presence section reserves the future RSVP area;
+there is no form, code lookup, mutation, or database access on the public page.
+
+Title, description, Open Graph text, and Twitter metadata are configured.
+Canonical metadata uses `NEXT_PUBLIC_SITE_URL` only when supplied. Search
+indexing stays disabled while real content is pending. Final favicon, social
+image, photos, and font integration remain visual-polish work in M7.
 
 ## Local setup
 
@@ -63,14 +94,15 @@ When `NODE_ENV=production`, database access requires `TURSO_DATABASE_URL`
 Only `NEXT_PUBLIC_SITE_URL` is intended as browser-visible configuration.
 
 The remaining documented variables are reserved for later milestones:
-`SESSION_SECRET`, `ADMIN_INITIAL_USERNAME`, `ADMIN_INITIAL_PASSWORD`,
-`WEDDING_DATE`, and `RSVP_DEADLINE`. Supplied secrets/dates/site URLs are validated;
-authentication and event settings are not required by this unused M1 infrastructure.
-Future feature boundaries must require the values they use. No ceremony time or
-RSVP deadline has been invented. The documented event timezone is America/Fortaleza.
+`SESSION_SECRET`, `ADMIN_INITIAL_USERNAME`, `ADMIN_INITIAL_PASSWORD`, and
+`RSVP_DEADLINE`. Supplied secrets/dates/site URLs are validated. M2 consumes
+`WEDDING_DATE` and `NEXT_PUBLIC_SITE_URL` without requiring database credentials.
+Future authentication and RSVP boundaries must require the values they use.
+No ceremony time or RSVP deadline has been invented. The documented event
+timezone is America/Fortaleza.
 
 Vercel should use Node 24 and the normal Next.js preset with `npm run build`.
-Do not deploy this placeholder as the completed wedding site.
+Review pending content and indexing before production deployment.
 
 Prisma CLI configuration targets **local SQLite only**. Production migration
 automation is deliberately absent: review the generated SQL, verify Turso
@@ -95,22 +127,39 @@ artifacts remain under ignored `test-results/database/` because native SQLite
 file handles can remain locked until the worker process exits on Windows.
 
 Playwright starts and stops a dedicated `next dev` on port 3100 and checks the
-placeholder at 375, 430, 768, and 1280 pixels for rendering, browser exceptions,
-language, and horizontal overflow. It contains no future product-flow tests.
+public page at 375, 430, 768, and 1280 pixels. It covers structure, metadata,
+browser exceptions, keyboard skip/section links, countdown updates/pause/resume,
+the reached-date state, and 320px reflow with 200% font size and expanded text
+spacing. It contains no future RSVP or admin-flow tests.
+
+Next.js permits only one dev server per checkout. To test an existing server,
+set `PLAYWRIGHT_BASE_URL=http://127.0.0.1:3000` for the test command; otherwise
+stop your existing dev server before running `npm run test:e2e`.
 
 M1 verification completed: lint and typecheck passed, all 8 Vitest tests and
 4 Playwright checks passed, production build passed, and a repeated migration
 reported the database in sync followed by a successful second seed run.
 
+M2 verification completed: lint, typecheck, production build, 13 Vitest tests,
+and 16 Playwright checks passed. Next's MCP endpoint reported no compilation or
+runtime errors. agent-browser 0.37.1 confirmed the server-rendered page and isolated
+Countdown component; desktop/mobile screenshots were inspected. Its axe-core
+4.12.1 scan reported zero violations. The two decorative arrows marked incomplete
+by the scanner use measured foreground/background contrast of 13.62:1 and 6.77:1.
+Keyboard navigation, text reflow, and reduced-motion behavior were browser tested;
+no real screen-reader session was performed, so this is not a WCAG conformance claim.
+
 ## Structure
 
-- `src/app/`: root layout, Tailwind entrypoint, and neutral placeholder route.
-- `src/lib/`: server-only environment/database access and shared local URL handling.
+- `src/app/`: server-rendered public page, root layout, metadata, and design tokens.
+- `src/components/wedding/`: interactive countdown.
+- `src/constants/wedding.ts`: public event information and pending content.
+- `src/lib/`: environment/database infrastructure, countdown arithmetic, and event-date validation.
 - `src/schemas/`: Zod environment schema.
 - `prisma/`: schema, initial migration, development seed.
 - `tests/`: unit, database integration, and foundation browser tests.
 
-Actions, services, components, and feature-specific schemas will be added when
+Actions, services, and feature-specific schemas will be added when
 they contain real functionality, following the documented architecture:
 Next.js → Server Actions/Route Handlers → domain logic → Prisma → SQLite/Turso.
 
@@ -139,7 +188,8 @@ Zod 4.5.4, Vitest 5.0.0, and Playwright 1.63.0.
 - Admin bootstrap/hashing remains M4. Event time, venue, RSVP deadline, final
   font files/assets, and supporting font choice remain future product/UI decisions.
 
-No stack or domain-model deviations were introduced. Scope choices are the
+No stack or domain-model deviations were introduced. M1 scope choices were the
 empty-value environment template, optional development admin seed omitted, and
 meaningful folders only. The repository originally had no `.git` directory;
-this task did not initialize Git or create commits. M2 has not been started.
+M1 task did not initialize Git or create commits. Git was initialized before M2.
+M2 adds no database changes. M3 has not been started.
