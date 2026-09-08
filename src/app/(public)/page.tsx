@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { z } from "zod";
 import { Countdown } from "@/components/wedding/countdown";
+import { RsvpSection } from "@/components/rsvp/rsvp-section";
 import { wedding } from "@/constants/wedding";
 import { resolveWeddingDate } from "@/lib/wedding-date";
 
@@ -42,6 +43,7 @@ export default function Home() {
           <a href="#nosso-dia">Nosso dia</a>
           <a href="#local">Local</a>
           <a href="#traje">Traje</a>
+          <a href="#rsvp">Confirmação</a>
         </nav>
       </header>
 
@@ -113,9 +115,7 @@ export default function Home() {
           <PhotoPlaceholder className="memories-photo" />
         </section>
 
-        <section className="presence-section section-space centered" aria-labelledby="presence-heading">
-          <div className="page-width"><p className="eyebrow">Vai ser especial ter você aqui</p><h2 id="presence-heading">Sua presença,<br />nosso presente.</h2><p className="section-intro">Em breve, você encontrará aqui as orientações para confirmar sua presença.</p></div>
-        </section>
+        <RsvpSection />
       </main>
 
       <footer className="site-footer centered">

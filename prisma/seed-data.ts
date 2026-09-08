@@ -8,7 +8,7 @@ export function assertLocalSeed(env: ServerEnv) {
 }
 
 export async function seedDevelopmentData(db: PrismaClient) {
-  // Fixed fixture identity/code is development-only; public code generation is M3.
+  // Fixed fixture identity/code is development-only and keeps manual RSVP checks repeatable.
   await db.invitation.upsert({
     where: { id: "development-invitation" },
     update: {},

@@ -5,13 +5,13 @@ test("public page has its M2 sections, metadata, and no runtime errors or overfl
   page.on("pageerror", (error) => errors.push(error.message));
   await page.goto("/");
   await expect(page.getByRole("heading", { name: "Ryelthon & Thayna", level: 1 })).toBeVisible();
-  for (const name of ["Até o nosso sim", "Nosso dia", "O local", "Com leveza, com você.", "Instantes que ficam com a gente.", "Sua presença, nosso presente."]) {
+  for (const name of ["Até o nosso sim", "Nosso dia", "O local", "Com leveza, com você.", "Instantes que ficam com a gente.", "Confirme sua presença"]) {
     await expect(page.getByRole("heading", { name, exact: true })).toBeVisible();
   }
   await expect(page).toHaveTitle("Ryelthon & Thayna | 10 de dezembro de 2026");
   await expect(page.locator('meta[property="og:locale"]')).toHaveAttribute("content", "pt_BR");
   await expect(page.locator('meta[name="description"]')).toHaveAttribute("content", /10 de dezembro de 2026/);
-  await expect(page.locator("form")).toHaveCount(0);
+  await expect(page.getByRole("form")).toHaveCount(1);
   await expect(page.getByRole("link", { name: /Como chegar/ })).toHaveCount(0);
   await expect(page.locator("html")).toHaveAttribute("lang", "pt-BR");
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
