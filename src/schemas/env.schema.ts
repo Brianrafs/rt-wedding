@@ -12,8 +12,8 @@ const optionalDate = z.preprocess(
 export const envSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   DATABASE_URL: optionalText,
-  TURSO_DATABASE_URL: optionalText,
-  TURSO_AUTH_TOKEN: optionalText,
+  TURSO_TOKEN_TURSO_DATABASE_URL: optionalText,
+  TURSO_TOKEN_TURSO_AUTH_TOKEN: optionalText,
   SESSION_SECRET: z.preprocess(
     (value) => value === "" ? undefined : value,
     z.string().min(32).optional(),
@@ -35,12 +35,12 @@ export const envSchema = z.object({
     });
   }
   if (env.NODE_ENV === "production") {
-    const url = z.url({ protocol: /^(libsql|https)$/ }).safeParse(env.TURSO_DATABASE_URL);
+    const url = z.url({ protocol: /^(libsql|https)$/ }).safeParse(env.TURSO_TOKEN_TURSO_DATABASE_URL);
     if (!url.success) {
-      ctx.addIssue({ code: "custom", path: ["TURSO_DATABASE_URL"], message: "A remote Turso URL is required." });
+      ctx.addIssue({ code: "custom", path: ["TURSO_TOKEN_TURSO_DATABASE_URL"], message: "A remote Turso URL is required." });
     }
-    if (!env.TURSO_AUTH_TOKEN?.trim()) {
-      ctx.addIssue({ code: "custom", path: ["TURSO_AUTH_TOKEN"], message: "A Turso token is required." });
+    if (!env.TURSO_TOKEN_TURSO_AUTH_TOKEN?.trim()) {
+      ctx.addIssue({ code: "custom", path: ["TURSO_TOKEN_TURSO_AUTH_TOKEN"], message: "A Turso token is required." });
     }
     if (!env.SESSION_SECRET) {
       ctx.addIssue({ code: "custom", path: ["SESSION_SECRET"], message: "A session secret is required." });
