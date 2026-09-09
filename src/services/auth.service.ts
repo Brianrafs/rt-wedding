@@ -2,8 +2,8 @@ import "server-only";
 import { createHmac, randomBytes } from "node:crypto";
 import type { PrismaClient } from "@/generated/prisma/client";
 import { adminSessionLifetimeSeconds } from "@/lib/session-cookie";
-import { verifyPassword } from "@/lib/password";
-import { loginSchema } from "@/schemas/auth.schema";
+import { hashPassword, verifyPassword } from "@/lib/password";
+import { initialAdminSchema, loginSchema } from "@/schemas/auth.schema";
 
 export class AuthenticationError extends Error {
   constructor() {
@@ -15,6 +15,35 @@ const dummyPasswordHash = `scrypt-v1$${Buffer.alloc(16).toString("base64url")}$$
 
 export function hashSessionToken(token: string, secret: string) {
   return createHmac("sha256", secret).update(token).digest("hex");
+}
+
+export async function ensureInitialAdmin(
+  db: PrismaClient,
+  input: { username?: string; password?: string },
+) {
+  if (!input.username && !input.password) return false;
+  const parsed = initialAdminSchema.safeParse(input);
+  if (!parsed.success) throw new Error("Invalid initial admin configuration.");
+
+  if (await db.adminUser.findFirst({ select: { id: true } })) return false;
+
+  const passwordHash = await hashPassword(parsed.data.password);
+  try {
+    await db.adminUser.create({
+      data: { username: parsed.data.username, passwordHash },
+    });
+    return true;
+  } catch (error) {
+    // Concurrent first-login requests may race. If the configured user now
+    // exists, bootstrap succeeded in the other request; otherwise preserve
+    // the infrastructure error for the caller.
+    const existing = await db.adminUser.findUnique({
+      where: { username: parsed.data.username },
+      select: { id: true },
+    });
+    if (existing) return false;
+    throw error;
+  }
 }
 
 export async function authenticateAdmin(input: unknown, db: PrismaClient) {

@@ -98,8 +98,11 @@ When `NODE_ENV=production`, database access requires `TURSO_DATABASE_URL`
 Only `NEXT_PUBLIC_SITE_URL` is intended as browser-visible configuration.
 
 `SESSION_SECRET` is required by production validation and authentication at runtime.
-The initial-admin variables are consumed only by seed/bootstrap; authentication
-subsequently uses the stored password hash. Supplied settings are validated. The
+The initial-admin variables are consumed by the local seed or, when the production
+database has no administrator yet, once during the first login attempt. The account
+is persisted with a salted hash; subsequent authentication uses only the stored
+record. Configure both variables together and remove or rotate the plaintext
+bootstrap password after confirming access. Supplied settings are validated. The
 site consumes `WEDDING_DATE` and `NEXT_PUBLIC_SITE_URL` without requiring database credentials.
 No ceremony time or RSVP deadline has been invented. The documented event
 timezone is America/Fortaleza.

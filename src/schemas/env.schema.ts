@@ -27,6 +27,13 @@ export const envSchema = z.object({
   WEDDING_DATE: optionalDate,
   RSVP_DEADLINE: optionalDate,
 }).superRefine((env, ctx) => {
+  if (Boolean(env.ADMIN_INITIAL_USERNAME) !== Boolean(env.ADMIN_INITIAL_PASSWORD)) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["ADMIN_INITIAL_USERNAME", "ADMIN_INITIAL_PASSWORD"],
+      message: "Initial admin username and password must be configured together.",
+    });
+  }
   if (env.NODE_ENV === "production") {
     const url = z.url({ protocol: /^(libsql|https)$/ }).safeParse(env.TURSO_DATABASE_URL);
     if (!url.success) {

@@ -5,10 +5,12 @@ import { redirect } from "next/navigation";
 import { getDb } from "@/lib/db";
 import { adminSessionCookie } from "@/lib/session-cookie";
 import { getSessionSecret } from "@/lib/session-secret";
+import { getServerEnv } from "@/lib/env";
 import {
   authenticateAdmin,
   AuthenticationError,
   createAdminSession,
+  ensureInitialAdmin,
   revokeAdminSession,
 } from "@/services/auth.service";
 
@@ -20,11 +22,17 @@ const unavailable = "Não foi possível entrar agora. Tente novamente em alguns 
 export async function loginAction(_: LoginState, formData: FormData): Promise<LoginState> {
   let session: Awaited<ReturnType<typeof createAdminSession>>;
   try {
+    const db = getDb();
+    const env = getServerEnv();
+    await ensureInitialAdmin(db, {
+      username: env.ADMIN_INITIAL_USERNAME,
+      password: env.ADMIN_INITIAL_PASSWORD,
+    });
     const admin = await authenticateAdmin({
       username: formData.get("username"),
       password: formData.get("password"),
-    }, getDb());
-    session = await createAdminSession(getDb(), admin.id, getSessionSecret());
+    }, db);
+    session = await createAdminSession(db, admin.id, getSessionSecret());
   } catch (error) {
     if (error instanceof AuthenticationError) return { error: invalidCredentials };
     console.error("Admin login failed.");

@@ -8,6 +8,7 @@ import { verifyPassword } from "@/lib/password";
 import {
   authenticateAdmin,
   createAdminSession,
+  ensureInitialAdmin,
   findAdminBySessionToken,
   hashSessionToken,
   revokeAdminSession,
@@ -45,6 +46,8 @@ afterAll(async () => {
 
 describe("admin authentication", () => {
   it("bootstraps a hashed admin once and authenticates with generic failures", async () => {
+    await expect(ensureInitialAdmin(db, {})).resolves.toBe(false);
+    await expect(ensureInitialAdmin(db, { username: "admin" })).rejects.toThrow("Invalid initial admin configuration");
     await expect(seedInitialAdmin(db, { username: "admin", password: "test-password-123" })).resolves.toBe(true);
     await expect(seedInitialAdmin(db, { username: "admin", password: "different-password" })).resolves.toBe(false);
     const stored = await db.adminUser.findUniqueOrThrow({ where: { username: "admin" } });

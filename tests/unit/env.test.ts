@@ -36,4 +36,13 @@ describe("server environment", () => {
     expect(() => parseEnv({ NEXT_PUBLIC_SITE_URL: "javascript:alert(1)" })).toThrow();
     expect(parseEnv({ WEDDING_DATE: "2026-12-10T00:00:00-03:00" }).WEDDING_DATE).toBe("2026-12-10T00:00:00-03:00");
   });
+
+  it("requires both initial admin values when bootstrap is configured", () => {
+    expect(() => parseEnv({ ADMIN_INITIAL_USERNAME: "admin" })).toThrow("ADMIN_INITIAL_USERNAME.ADMIN_INITIAL_PASSWORD");
+    expect(() => parseEnv({ ADMIN_INITIAL_PASSWORD: "strong-password" })).toThrow("ADMIN_INITIAL_USERNAME.ADMIN_INITIAL_PASSWORD");
+    expect(parseEnv({ ADMIN_INITIAL_USERNAME: "admin", ADMIN_INITIAL_PASSWORD: "strong-password" })).toMatchObject({
+      ADMIN_INITIAL_USERNAME: "admin",
+      ADMIN_INITIAL_PASSWORD: "strong-password",
+    });
+  });
 });
