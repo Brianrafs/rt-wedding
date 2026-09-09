@@ -598,7 +598,7 @@ Never commit:
 ```text
 .env
 .env.local
-TURSO_TOKEN_TURSO_AUTH_TOKEN
+TURSO_AUTH_TOKEN
 session secrets
 production admin credentials
 ```

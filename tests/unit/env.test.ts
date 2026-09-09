@@ -5,19 +5,19 @@ import { assertLocalSeed } from "../../prisma/seed-data";
 
 describe("server environment", () => {
   it("supports local development without production credentials", () => {
-    const env = parseEnv({ DATABASE_URL: "", TURSO_TOKEN_TURSO_DATABASE_URL: "", SESSION_SECRET: "" });
+    const env = parseEnv({ DATABASE_URL: "", TURSO_DATABASE_URL: "", SESSION_SECRET: "" });
     expect(env.NODE_ENV).toBe("development");
     expect(databaseConfig(env)).toEqual({ url: localDatabaseUrl() });
     expect(localDatabaseUrl()).toMatch(/^file:.*\/prisma\/dev\.db$/);
   });
 
   it("requires remote credentials in production and never falls back to SQLite", () => {
-    expect(() => parseEnv({ NODE_ENV: "production", DATABASE_URL: "file:./dev.db" })).toThrow("TURSO_TOKEN_TURSO_DATABASE_URL");
+    expect(() => parseEnv({ NODE_ENV: "production", DATABASE_URL: "file:./dev.db" })).toThrow("TURSO_DATABASE_URL");
     for (const url of ["file:./dev.db", "http://example.com", "not-a-url"]) {
-      expect(() => parseEnv({ NODE_ENV: "production", TURSO_TOKEN_TURSO_DATABASE_URL: url, TURSO_TOKEN_TURSO_AUTH_TOKEN: "test-token" })).toThrow();
+      expect(() => parseEnv({ NODE_ENV: "production", TURSO_DATABASE_URL: url, TURSO_AUTH_TOKEN: "test-token" })).toThrow();
     }
-    expect(() => parseEnv({ NODE_ENV: "production", TURSO_TOKEN_TURSO_DATABASE_URL: "libsql://example.turso.io", TURSO_TOKEN_TURSO_AUTH_TOKEN: "test-token" })).toThrow("SESSION_SECRET");
-    const env = parseEnv({ NODE_ENV: "production", TURSO_TOKEN_TURSO_DATABASE_URL: "libsql://example.turso.io", TURSO_TOKEN_TURSO_AUTH_TOKEN: "test-token", SESSION_SECRET: "a".repeat(32) });
+    expect(() => parseEnv({ NODE_ENV: "production", TURSO_DATABASE_URL: "libsql://example.turso.io", TURSO_AUTH_TOKEN: "test-token" })).toThrow("SESSION_SECRET");
+    const env = parseEnv({ NODE_ENV: "production", TURSO_DATABASE_URL: "libsql://example.turso.io", TURSO_AUTH_TOKEN: "test-token", SESSION_SECRET: "a".repeat(32) });
     expect(databaseConfig(env)).toEqual({ url: "libsql://example.turso.io", authToken: "test-token" });
     expect(() => assertLocalSeed(env)).toThrow("restricted to local SQLite");
   });

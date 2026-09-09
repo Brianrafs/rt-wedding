@@ -93,8 +93,8 @@ build. No migrations or seeding run as part of builds.
 
 ## Production boundary
 
-When `NODE_ENV=production`, database access requires `TURSO_TOKEN_TURSO_DATABASE_URL`
-(`libsql://` or HTTPS) and `TURSO_TOKEN_TURSO_AUTH_TOKEN`. It cannot fall back to local SQLite.
+When `NODE_ENV=production`, database access requires `TURSO_DATABASE_URL`
+(`libsql://` or HTTPS) and `TURSO_AUTH_TOKEN`. It cannot fall back to local SQLite.
 Only `NEXT_PUBLIC_SITE_URL` is intended as browser-visible configuration.
 
 `SESSION_SECRET` is required by production validation and authentication at runtime.

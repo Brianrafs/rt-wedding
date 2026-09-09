@@ -15,7 +15,7 @@ export function localDatabaseUrl(url = "file:./prisma/dev.db") {
 export function databaseConfig(env: ServerEnv) {
   if (env.NODE_ENV === "production") {
     // env has already passed parseEnv; never fall back to a local file here.
-    return { url: env.TURSO_TOKEN_TURSO_DATABASE_URL!, authToken: env.TURSO_TOKEN_TURSO_AUTH_TOKEN! };
+    return { url: env.TURSO_DATABASE_URL!, authToken: env.TURSO_AUTH_TOKEN! };
   }
   return { url: localDatabaseUrl(env.DATABASE_URL) };
 }

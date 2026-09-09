@@ -561,8 +561,8 @@ Turso / libSQL
 Required environment variables:
 
 ```text
-TURSO_TOKEN_TURSO_DATABASE_URL
-TURSO_TOKEN_TURSO_AUTH_TOKEN
+TURSO_DATABASE_URL
+TURSO_AUTH_TOKEN
 ```
 
 Do not store a production SQLite file inside the Vercel filesystem.
@@ -580,8 +580,8 @@ import { PrismaClient } from "@/generated/prisma";
 import { PrismaLibSQL } from "@prisma/adapter-libsql";
 
 const adapter = new PrismaLibSQL({
-  url: process.env.TURSO_TOKEN_TURSO_DATABASE_URL!,
-  authToken: process.env.TURSO_TOKEN_TURSO_AUTH_TOKEN!,
+  url: process.env.TURSO_DATABASE_URL!,
+  authToken: process.env.TURSO_AUTH_TOKEN!,
 });
 
 export const db = new PrismaClient({
@@ -636,8 +636,8 @@ Never perform destructive production migrations without reviewing existing data.
 Expected configuration:
 
 ```env
-TURSO_TOKEN_TURSO_DATABASE_URL=
-TURSO_TOKEN_TURSO_AUTH_TOKEN=
+TURSO_DATABASE_URL=
+TURSO_AUTH_TOKEN=
 
 SESSION_SECRET=
 
@@ -678,8 +678,8 @@ Example:
 
 ```ts
 const envSchema = z.object({
-  TURSO_TOKEN_TURSO_DATABASE_URL: z.string().min(1),
-  TURSO_TOKEN_TURSO_AUTH_TOKEN: z.string().min(1),
+  TURSO_DATABASE_URL: z.string().min(1),
+  TURSO_AUTH_TOKEN: z.string().min(1),
   SESSION_SECRET: z.string().min(32),
 });
 ```
@@ -2025,8 +2025,8 @@ The application must authenticate against the stored AdminUser afterward, not co
 Commit:
 
 ```env
-TURSO_TOKEN_TURSO_DATABASE_URL=
-TURSO_TOKEN_TURSO_AUTH_TOKEN=
+TURSO_DATABASE_URL=
+TURSO_AUTH_TOKEN=
 
 SESSION_SECRET=
 
@@ -2087,8 +2087,8 @@ Configure production environment variables inside Vercel.
 Required:
 
 ```text
-TURSO_TOKEN_TURSO_DATABASE_URL
-TURSO_TOKEN_TURSO_AUTH_TOKEN
+TURSO_DATABASE_URL
+TURSO_AUTH_TOKEN
 SESSION_SECRET
 NEXT_PUBLIC_SITE_URL
 WEDDING_DATE
