@@ -1,6 +1,8 @@
 import "dotenv/config";
 import { defineConfig } from "prisma/config";
-import { localDatabaseUrl } from "./src/lib/database-config";
+import { prismaCliDatasource } from "./src/lib/database-config";
+
+const datasource = prismaCliDatasource();
 
 export default defineConfig({
   schema: "prisma/schema.prisma",
@@ -9,5 +11,5 @@ export default defineConfig({
     seed: "node --conditions=react-server --import tsx prisma/seed.ts",
   },
   // Prisma CLI manages local SQLite only. Reviewed SQL goes to Turso separately.
-  datasource: { url: localDatabaseUrl(process.env.DATABASE_URL || undefined) },
+  ...(datasource ? { datasource } : {}),
 });

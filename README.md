@@ -110,7 +110,9 @@ timezone is America/Fortaleza.
 Vercel should use Node 24 and the normal Next.js preset with `npm run build`.
 Review pending content and indexing before production deployment.
 
-Prisma CLI configuration targets **local SQLite only**. Production migration
+Prisma CLI configuration targets **local SQLite only**. If Vercel or another
+provider supplies a remote `DATABASE_URL`, client generation ignores that value;
+the application runtime continues to use `TURSO_DATABASE_URL`. Production migration
 automation is deliberately absent: review the generated SQL, verify Turso
 compatibility and backups, then apply it through the approved Turso workflow
 before deploying dependent code. No remote schema or production data was touched.

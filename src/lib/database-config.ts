@@ -12,6 +12,15 @@ export function localDatabaseUrl(url = "file:./prisma/dev.db") {
   return `file:${path.replaceAll("\\", "/")}`;
 }
 
+export function prismaCliDatasource(url = process.env.DATABASE_URL) {
+  // Client generation does not require a datasource. When a hosting provider
+  // supplies a remote DATABASE_URL, omit it so Prisma CLI cannot mistake it
+  // for the local SQLite database used by migration commands.
+  const configuredUrl = url?.trim();
+  if (configuredUrl && !configuredUrl.startsWith("file:")) return undefined;
+  return { url: localDatabaseUrl(configuredUrl || undefined) };
+}
+
 export function databaseConfig(env: ServerEnv) {
   if (env.NODE_ENV === "production") {
     // env has already passed parseEnv; never fall back to a local file here.

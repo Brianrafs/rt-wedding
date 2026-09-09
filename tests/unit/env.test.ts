@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { databaseConfig, localDatabaseUrl } from "@/lib/database-config";
+import { databaseConfig, localDatabaseUrl, prismaCliDatasource } from "@/lib/database-config";
 import { parseEnv } from "@/schemas/env.schema";
 import { assertLocalSeed } from "../../prisma/seed-data";
 
@@ -25,6 +25,14 @@ describe("server environment", () => {
   it("rejects remote development databases", () => {
     expect(() => parseEnv({ DATABASE_URL: "libsql://example.turso.io" })).toThrow("DATABASE_URL");
     expect(() => localDatabaseUrl("libsql://example.turso.io")).toThrow();
+  });
+
+  it("omits remote URLs from the local-only Prisma CLI configuration", () => {
+    expect(prismaCliDatasource("libsql://example.turso.io")).toBeUndefined();
+    expect(prismaCliDatasource("https://example.turso.io")).toBeUndefined();
+    expect(prismaCliDatasource("")).toEqual({ url: localDatabaseUrl() });
+    expect(prismaCliDatasource("   ")).toEqual({ url: localDatabaseUrl() });
+    expect(prismaCliDatasource("file:./prisma/dev.db")).toEqual({ url: localDatabaseUrl("file:./prisma/dev.db") });
   });
 
   it("validates supplied future settings without leaking secret values", () => {
