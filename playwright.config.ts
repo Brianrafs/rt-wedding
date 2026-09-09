@@ -7,7 +7,10 @@ export default defineConfig({
   testDir: "./tests/e2e",
   globalSetup: "./tests/e2e/global-setup.ts",
   outputDir: "test-results/playwright",
-  fullyParallel: true,
+  // Every project intentionally exercises the same local SQLite database.
+  // Serialize browser workers so concurrent destructive flows cannot lock it.
+  fullyParallel: false,
+  workers: 1,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   reporter: "list",

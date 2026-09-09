@@ -1,5 +1,6 @@
 import "server-only";
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import { getDb } from "@/lib/db";
 import { adminSessionCookie } from "@/lib/session-cookie";
 import { getSessionSecret } from "@/lib/session-secret";
@@ -21,4 +22,13 @@ export async function requireAdmin() {
   const admin = await getCurrentAdmin();
   if (!admin) throw new UnauthorizedError();
   return admin;
+}
+
+export async function requireAdminPage() {
+  try {
+    return await requireAdmin();
+  } catch (error) {
+    if (error instanceof UnauthorizedError) redirect("/admin/login");
+    throw error;
+  }
 }

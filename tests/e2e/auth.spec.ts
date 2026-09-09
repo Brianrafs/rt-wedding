@@ -21,7 +21,7 @@ test("admin signs in with stored credentials and logout invalidates the session"
   await page.getByLabel("Senha").fill("test-password-123");
   await page.getByRole("button", { name: "Entrar" }).click();
   await expect(page).toHaveURL(/\/admin$/);
-  await expect(page.getByRole("heading", { name: "Área administrativa" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Resumo dos convidados" })).toBeVisible();
 
   const cookie = (await context.cookies()).find((item) => item.name === "rt_admin_session");
   expect(cookie).toMatchObject({ httpOnly: true, secure: false, sameSite: "Lax", path: "/" });
