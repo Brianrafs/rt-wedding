@@ -21,21 +21,32 @@ const unavailable = "Não foi possível entrar agora. Tente novamente em alguns 
 
 export async function loginAction(_: LoginState, formData: FormData): Promise<LoginState> {
   let session: Awaited<ReturnType<typeof createAdminSession>>;
+  let stage = "configuration";
   try {
     const db = getDb();
     const env = getServerEnv();
+    stage = "initial-admin";
     await ensureInitialAdmin(db, {
       username: env.ADMIN_INITIAL_USERNAME,
       password: env.ADMIN_INITIAL_PASSWORD,
     });
+    stage = "credentials";
     const admin = await authenticateAdmin({
       username: formData.get("username"),
       password: formData.get("password"),
     }, db);
+    stage = "session";
     session = await createAdminSession(db, admin.id, getSessionSecret());
   } catch (error) {
     if (error instanceof AuthenticationError) return { error: invalidCredentials };
-    console.error("Admin login failed.");
+    const code = error && typeof error === "object" && "code" in error && typeof error.code === "string"
+      ? error.code
+      : undefined;
+    console.error("Admin login failed.", {
+      stage,
+      errorName: error instanceof Error ? error.name : "UnknownError",
+      ...(code ? { code } : {}),
+    });
     return { error: unavailable };
   }
 
