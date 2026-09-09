@@ -27,7 +27,9 @@ export default defineConfig({
     env: {
       ...process.env,
       DATABASE_URL: "file:./test-results/e2e/e2e.db",
+      NEXT_DIST_DIR: ".next-e2e",
       RSVP_DEADLINE: "2099-12-01T23:59:59-03:00",
+      SESSION_SECRET: "e2e-session-secret-at-least-32-characters",
     },
     reuseExistingServer: false,
     timeout: 120_000,

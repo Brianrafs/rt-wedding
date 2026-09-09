@@ -3,7 +3,7 @@ import { join, resolve } from "node:path";
 import { createClient } from "@libsql/client";
 import { PrismaLibSql } from "@prisma/adapter-libsql";
 import { PrismaClient } from "../../src/generated/prisma/client";
-import { seedDevelopmentData } from "../../prisma/seed-data";
+import { seedDevelopmentData, seedInitialAdmin } from "../../prisma/seed-data";
 
 export default async function globalSetup() {
   const databasePath = resolve("test-results/e2e/e2e.db");
@@ -25,6 +25,7 @@ export default async function globalSetup() {
   const db = new PrismaClient({ adapter: new PrismaLibSql({ url }) });
   try {
     await seedDevelopmentData(db);
+    await seedInitialAdmin(db, { username: "admin-e2e", password: "test-password-123" });
   } finally {
     await db.$disconnect();
   }

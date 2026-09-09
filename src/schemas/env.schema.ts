@@ -35,6 +35,9 @@ export const envSchema = z.object({
     if (!env.TURSO_AUTH_TOKEN?.trim()) {
       ctx.addIssue({ code: "custom", path: ["TURSO_AUTH_TOKEN"], message: "A Turso token is required." });
     }
+    if (!env.SESSION_SECRET) {
+      ctx.addIssue({ code: "custom", path: ["SESSION_SECRET"], message: "A session secret is required." });
+    }
   } else if (env.DATABASE_URL && !/^file:.+/.test(env.DATABASE_URL)) {
     ctx.addIssue({ code: "custom", path: ["DATABASE_URL"], message: "Use a local SQLite file URL." });
   }

@@ -1,4 +1,6 @@
 import type { PrismaClient } from "../src/generated/prisma/client";
+import { hashPassword } from "../src/lib/password";
+import { initialAdminSchema } from "../src/schemas/auth.schema";
 import type { ServerEnv } from "../src/schemas/env.schema";
 
 export function assertLocalSeed(env: ServerEnv) {
@@ -21,4 +23,25 @@ export async function seedDevelopmentData(db: PrismaClient) {
       },
     },
   });
+}
+
+export async function seedInitialAdmin(
+  db: PrismaClient,
+  input: { username?: string; password?: string },
+) {
+  if (!input.username && !input.password) return false;
+  const parsed = initialAdminSchema.safeParse(input);
+  if (!parsed.success) throw new Error("Invalid initial admin configuration.");
+  const existing = await db.adminUser.findUnique({
+    where: { username: parsed.data.username },
+    select: { id: true },
+  });
+  if (existing) return false;
+  await db.adminUser.create({
+    data: {
+      username: parsed.data.username,
+      passwordHash: await hashPassword(parsed.data.password),
+    },
+  });
+  return true;
 }

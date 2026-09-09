@@ -1,9 +1,9 @@
-# Ryelthon & Thayna — M2 Public Website
+# Ryelthon & Thayna — M4 Admin Authentication
 
-One Next.js App Router application. Milestones M1 and M2 are implemented.
+One Next.js App Router application. Milestones M1 through M4 are implemented.
 The `/` route contains the public wedding page with a hero, countdown, event
-details, venue, dress code, photo placeholders, and footer. RSVP, authentication,
-admin screens, and deployment are deferred.
+details, venue, dress code, photo placeholders, RSVP, and footer. The protected
+administrative area currently contains authentication only; management remains M5.
 
 ## Public content and M2 boundaries
 
@@ -27,8 +27,8 @@ new application dependencies were introduced in M2.
 The page/layout remain Server Components; only the countdown is interactive.
 It supports pause/resume, avoids per-second screen-reader announcements, handles
 the reached-date state without negative values, and offers a no-JavaScript
-explanation. An informational presence section reserves the future RSVP area;
-there is no form, code lookup, mutation, or database access on the public page.
+explanation. The RSVP section supports code lookup, grouped individual responses,
+optional information, edits, server-authoritative deadlines, and persistence.
 
 Title, description, Open Graph text, and Twitter metadata are configured.
 Canonical metadata uses `NEXT_PUBLIC_SITE_URL` only when supplied. Search
@@ -47,7 +47,7 @@ npm run db:seed
 npm run dev
 ```
 
-Open http://localhost:3000. No credentials are needed for M1 local development.
+Open http://localhost:3000. Public pages need no credentials.
 The default SQLite file is `prisma/dev.db`, ignored by Git. The CLI and runtime
 resolve local paths from the project root to avoid creating separate databases.
 Run commands from the project root.
@@ -57,6 +57,9 @@ To customize configuration, copy `.env.example` to `.env`. Example local values:
 ```env
 DATABASE_URL=file:./prisma/dev.db
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
+SESSION_SECRET=replace-with-at-least-32-random-characters
+ADMIN_INITIAL_USERNAME=admin
+ADMIN_INITIAL_PASSWORD=replace-with-a-strong-password
 ```
 
 `.env.example` deliberately has empty values only. The Prisma CLI and seed load
@@ -81,7 +84,8 @@ The development-only seed creates one **Família Teste** invitation and two
 RSVP-eligible, pending guests, **João Teste** and **Maria Teste**. Re-running it
 does not duplicate records or overwrite edits. Its fixed fixture code is local
 test data, not a production code generator. The seed refuses production execution.
-It does not create admin credentials; bootstrap and password hashing belong to M4.
+When both initial-admin variables are supplied, the seed creates the administrator
+once with a salted scrypt hash. Later seed runs never overwrite its password.
 
 Schema changes use `npm run db:migrate -- --name descriptive_name`, followed by
 `npm run db:generate`. Generation also runs during install, typecheck, tests, and
@@ -93,11 +97,10 @@ When `NODE_ENV=production`, database access requires `TURSO_DATABASE_URL`
 (`libsql://` or HTTPS) and `TURSO_AUTH_TOKEN`. It cannot fall back to local SQLite.
 Only `NEXT_PUBLIC_SITE_URL` is intended as browser-visible configuration.
 
-The remaining documented variables are reserved for later milestones:
-`SESSION_SECRET`, `ADMIN_INITIAL_USERNAME`, `ADMIN_INITIAL_PASSWORD`, and
-`RSVP_DEADLINE`. Supplied secrets/dates/site URLs are validated. M2 consumes
-`WEDDING_DATE` and `NEXT_PUBLIC_SITE_URL` without requiring database credentials.
-Future authentication and RSVP boundaries must require the values they use.
+`SESSION_SECRET` is required by production validation and authentication at runtime.
+The initial-admin variables are consumed only by seed/bootstrap; authentication
+subsequently uses the stored password hash. Supplied settings are validated. The
+site consumes `WEDDING_DATE` and `NEXT_PUBLIC_SITE_URL` without requiring database credentials.
 No ceremony time or RSVP deadline has been invented. The documented event
 timezone is America/Fortaleza.
 
@@ -126,11 +129,11 @@ seed repeatability, foreign keys, uniqueness, and cascade behavior. Test databas
 artifacts remain under ignored `test-results/database/` because native SQLite
 file handles can remain locked until the worker process exits on Windows.
 
-Playwright starts and stops a dedicated `next dev` on port 3100 and checks the
+Playwright starts and stops a dedicated isolated `next dev` on port 3100 and checks the
 public page at 375, 430, 768, and 1280 pixels. It covers structure, metadata,
 browser exceptions, keyboard skip/section links, countdown updates/pause/resume,
 the reached-date state, and 320px reflow with 200% font size and expanded text
-spacing. It contains no future RSVP or admin-flow tests.
+spacing. It also covers RSVP and the complete M4 login/session/logout flow.
 
 Next.js permits only one dev server per checkout. To test an existing server,
 set `PLAYWRIGHT_BASE_URL=http://127.0.0.1:3000` for the test command; otherwise
@@ -151,16 +154,16 @@ no real screen-reader session was performed, so this is not a WCAG conformance c
 
 ## Structure
 
-- `src/app/`: server-rendered public page, root layout, metadata, and design tokens.
+- `src/app/`: public page, admin login, protected admin shell, metadata, and design tokens.
+- `src/actions/`: validated RSVP and authentication Server Actions.
 - `src/components/wedding/`: interactive countdown.
 - `src/constants/wedding.ts`: public event information and pending content.
-- `src/lib/`: environment/database infrastructure, countdown arithmetic, and event-date validation.
-- `src/schemas/`: Zod environment schema.
+- `src/lib/`: environment/database infrastructure, password/session primitives, countdown, and dates.
+- `src/schemas/`: Zod schemas for environment, RSVP, and authentication input.
 - `prisma/`: schema, initial migration, development seed.
 - `tests/`: unit, database integration, and foundation browser tests.
 
-Actions, services, and feature-specific schemas will be added when
-they contain real functionality, following the documented architecture:
+The application follows the documented architecture:
 Next.js → Server Actions/Route Handlers → domain logic → Prisma → SQLite/Turso.
 
 ## Version choices and remaining decisions
@@ -185,11 +188,16 @@ Zod 4.5.4, Vitest 5.0.0, and Playwright 1.63.0.
   or unverified major transitive override was applied.
 - Turso credentials, the exact approved remote migration procedure, and Vercel
   provisioning remain M8 work. Remote connectivity has not been tested.
-- Admin bootstrap/hashing remains M4. Event time, venue, RSVP deadline, final
+- Admin management remains M5. Event time, venue, RSVP deadline, final
   font files/assets, and supporting font choice remain future product/UI decisions.
 
 No stack or domain-model deviations were introduced. M1 scope choices were the
 empty-value environment template, optional development admin seed omitted, and
 meaningful folders only. The repository originally had no `.git` directory;
 M1 task did not initialize Git or create commits. Git was initialized before M2.
-M2 adds no database changes. M3 has not been started.
+M2 through M4 add no database schema changes.
+
+M4 verification completed: lint, typecheck, production build, 26 Vitest tests,
+and 28 Playwright checks passed. Playwright covered missing and forged sessions,
+generic credential errors, successful login, secure cookie attributes, protected
+route access, server-side logout invalidation, and all previous public flows.

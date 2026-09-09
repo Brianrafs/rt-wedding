@@ -16,7 +16,8 @@ describe("server environment", () => {
     for (const url of ["file:./dev.db", "http://example.com", "not-a-url"]) {
       expect(() => parseEnv({ NODE_ENV: "production", TURSO_DATABASE_URL: url, TURSO_AUTH_TOKEN: "test-token" })).toThrow();
     }
-    const env = parseEnv({ NODE_ENV: "production", TURSO_DATABASE_URL: "libsql://example.turso.io", TURSO_AUTH_TOKEN: "test-token" });
+    expect(() => parseEnv({ NODE_ENV: "production", TURSO_DATABASE_URL: "libsql://example.turso.io", TURSO_AUTH_TOKEN: "test-token" })).toThrow("SESSION_SECRET");
+    const env = parseEnv({ NODE_ENV: "production", TURSO_DATABASE_URL: "libsql://example.turso.io", TURSO_AUTH_TOKEN: "test-token", SESSION_SECRET: "a".repeat(32) });
     expect(databaseConfig(env)).toEqual({ url: "libsql://example.turso.io", authToken: "test-token" });
     expect(() => assertLocalSeed(env)).toThrow("restricted to local SQLite");
   });
