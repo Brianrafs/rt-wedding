@@ -67,10 +67,17 @@ describe("RSVP persistence", () => {
       ],
     }, db, openDeadline, () => beforeDeadline);
 
-    expect(saved.guests.map((guest) => guest.status)).toEqual(["CONFIRMED", "DECLINED", "PENDING"]);
+    expect(saved.guests.map((guest) => guest.status)).toEqual(["CONFIRMED", "DECLINED", "CONFIRMED"]);
     expect(saved.guests[0]).toMatchObject({ phone: "83999990000", dietaryRestriction: "Sem lactose", message: "Até lá!" });
     expect(saved.guests[1].notes).toBe("Estarei viajando");
     expect((await db.guest.findUniqueOrThrow({ where: { id: eligible[0].id } })).respondedAt).toEqual(beforeDeadline);
+    expect((await db.guest.findFirstOrThrow({ where: { invitationId: invitation.id, requiresRsvp: false } })).respondedAt).toEqual(beforeDeadline);
+
+    const declined = await submitRsvp({
+      code: "M4Q8LA",
+      guests: eligible.map((guest) => ({ guestId: guest.id, status: "DECLINED" as const })),
+    }, db, openDeadline, () => beforeDeadline);
+    expect(declined.guests.map((guest) => guest.status)).toEqual(["DECLINED", "DECLINED", "DECLINED"]);
   });
 
   it("rejects foreign, omitted, and non-eligible guests without partial writes", async () => {

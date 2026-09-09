@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createGuestSchema, createInvitationSchema, invitationListQuerySchema } from "@/schemas/admin.schema";
+import { createGuestSchema, createInvitationSchema, invitationListQuerySchema, updateGuestSchema } from "@/schemas/admin.schema";
 import { calculateDashboardStats } from "@/services/admin.service";
 
 describe("admin validation", () => {
@@ -23,6 +23,13 @@ describe("admin validation", () => {
   it("uses safe defaults when list filters are omitted", () => {
     expect(invitationListQuerySchema.parse({})).toEqual({ query: "", status: "ALL" });
   });
+
+  it("allows an admin edit without guest-owned RSVP details", () => {
+    expect(updateGuestSchema.parse({ name: "Maria Silva", requiresRsvp: true })).toEqual({
+      name: "Maria Silva",
+      requiresRsvp: true,
+    });
+  });
 });
 
 describe("dashboard metrics", () => {
@@ -38,4 +45,3 @@ describe("dashboard metrics", () => {
     expect(stats.totalEligible).toBe(stats.confirmed + stats.declined + stats.pending);
   });
 });
-

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { getCountdown } from "@/lib/countdown";
+import { PauseIcon, PlayIcon } from "@/components/ui/icons";
 
 const units = [
   ["days", "dias"], ["hours", "horas"], ["minutes", "minutos"], ["seconds", "segundos"],
@@ -26,24 +27,19 @@ export function Countdown({ datetime }: { datetime: string }) {
   }, [paused, complete]);
 
   return (
-    <div className="countdown">
+    <div className="mx-auto mt-10 min-h-42.5 max-w-160">
       {countdown?.complete ? (
-        <p className="countdown-complete">O nosso grande dia chegou.</p>
+        <p className="py-8 font-display text-3xl">O nosso grande dia chegou.</p>
       ) : (
         <>
-          <dl className="countdown-units" aria-label="Contagem regressiva" aria-live="off">
+          <dl className="grid grid-cols-2 gap-y-6 min-[430px]:grid-cols-4" aria-label="Contagem regressiva" aria-live="off">
             {units.map(([key, label]) => (
-              <div key={key}>
-                <dt>{label}</dt>
-                <dd>{countdown ? String(countdown[key]).padStart(2, "0") : "—"}</dd>
+              <div className="flex flex-col-reverse gap-1 px-1 even:border-l even:border-border min-[430px]:not-first:border-l min-[430px]:not-first:border-border" key={key}>
+                <dt className="text-[0.625rem] tracking-[0.08em]">{label}</dt>
+                <dd className="font-display text-[clamp(2.5rem,6vw,4.5rem)] leading-[1.2] tabular-nums">{countdown ? String(countdown[key]).padStart(2, "0") : "—"}</dd>
               </div>
             ))}
           </dl>
-          {countdown && (
-            <button className="countdown-control" type="button" onClick={() => setPaused(!paused)}>
-              {paused ? "Retomar contagem" : "Pausar contagem"}
-            </button>
-          )}
           <noscript><p>A contagem regressiva precisa de JavaScript. Nosso dia será 10 de dezembro de 2026.</p></noscript>
         </>
       )}

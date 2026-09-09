@@ -13,6 +13,7 @@ import {
   deleteInvitation,
   getDashboardStats,
   getInvitation,
+  listGuestMessages,
   listInvitations,
   updateGuest,
   updateInvitation,
@@ -64,11 +65,14 @@ describe("admin invitation management", () => {
 
   it("searches invitations and filters them by eligible guest status", async () => {
     const invitation = await db.invitation.findFirstOrThrow({ where: { name: "Família Silva" }, include: { guests: true } });
-    await db.guest.update({ where: { id: invitation.guests[0].id }, data: { status: "CONFIRMED", respondedAt: new Date() } });
+    await db.guest.update({ where: { id: invitation.guests[0].id }, data: { status: "CONFIRMED", respondedAt: new Date(), message: "Que dia especial!" } });
     expect(await listInvitations({ query: "João", status: "ALL" }, db)).toHaveLength(1);
     expect(await listInvitations({ query: invitation.code.toLowerCase(), status: "CONFIRMED" }, db)).toHaveLength(1);
     expect(await listInvitations({ query: "", status: "DECLINED" }, db)).toHaveLength(0);
     await expect(getDashboardStats(db)).resolves.toEqual({ totalEligible: 1, confirmed: 1, declined: 0, pending: 0 });
+    await expect(listGuestMessages(db)).resolves.toMatchObject([
+      { name: "João Silva", message: "Que dia especial!", invitation: { name: "Família Silva" } },
+    ]);
   });
 
   it("edits without changing the code and supports guest CRUD", async () => {
@@ -80,6 +84,8 @@ describe("admin invitation management", () => {
     const guest = await createGuest(invitation.id, { name: "Ana Souza", requiresRsvp: true, ...emptyMetadata }, db);
     await expect(updateGuest(guest.id, { name: "Ana Maria Souza", requiresRsvp: true, phone: "85999999999", dietaryRestriction: "", notes: "", message: "" }, db)).resolves.toBe(invitation.id);
     await expect(db.guest.findUnique({ where: { id: guest.id } })).resolves.toMatchObject({ name: "Ana Maria Souza", phone: "85999999999" });
+    await expect(updateGuest(guest.id, { name: "Ana Souza", requiresRsvp: false }, db)).resolves.toBe(invitation.id);
+    await expect(db.guest.findUnique({ where: { id: guest.id } })).resolves.toMatchObject({ name: "Ana Souza", requiresRsvp: false, phone: "85999999999" });
     await expect(deleteGuest(guest.id, db)).resolves.toBe(invitation.id);
     await expect(db.guest.findUnique({ where: { id: guest.id } })).resolves.toBeNull();
   });

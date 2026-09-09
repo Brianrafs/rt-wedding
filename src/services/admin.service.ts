@@ -56,6 +56,22 @@ export async function getDashboardStats(db: PrismaClient) {
   return calculateDashboardStats(guests);
 }
 
+export async function listGuestMessages(db: PrismaClient) {
+  return db.guest.findMany({
+    where: { message: { not: null } },
+    orderBy: [{ respondedAt: "desc" }, { createdAt: "desc" }],
+    select: {
+      id: true,
+      name: true,
+      message: true,
+      respondedAt: true,
+      invitation: { select: { id: true, name: true, code: true } },
+    },
+  }).then((guests) => guests.filter(
+    (guest): guest is typeof guest & { message: string } => Boolean(guest.message?.trim()),
+  ));
+}
+
 export async function listInvitations(input: unknown, db: PrismaClient) {
   const parsed = invitationListQuerySchema.safeParse(input);
   const filters = parsed.success ? parsed.data : { query: "", status: "ALL" as const };

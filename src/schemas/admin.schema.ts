@@ -15,7 +15,7 @@ export const createGuestSchema = z.object({
   message: optionalText(2000),
 }).strict();
 
-export const updateGuestSchema = createGuestSchema;
+export const updateGuestSchema = createGuestSchema.partial().required({ name: true, requiresRsvp: true });
 
 export const createInvitationSchema = z.object({
   name: requiredName,
@@ -28,4 +28,3 @@ export const invitationListQuerySchema = z.object({
   query: z.string().trim().max(120).default(""),
   status: z.enum(["ALL", "PENDING", "CONFIRMED", "DECLINED"]).default("ALL"),
 }).strict();
-

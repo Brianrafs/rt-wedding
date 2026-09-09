@@ -18,16 +18,14 @@ import type { AdminActionState } from "@/types/admin";
 
 const unavailableMessage = "Não foi possível salvar agora. Tente novamente.";
 
-function fieldsFromFormData(formData: FormData) {
+function adminGuestFieldsFromFormData(formData: FormData) {
   return {
     name: formData.get("name"),
     requiresRsvp: formData.get("requiresRsvp") === "true",
-    phone: formData.get("phone"),
-    dietaryRestriction: formData.get("dietaryRestriction"),
-    notes: formData.get("notes"),
-    message: formData.get("message"),
   };
 }
+
+const emptyGuestDetails = { phone: "", dietaryRestriction: "", notes: "", message: "" };
 
 function actionFailure(error: unknown): AdminActionState {
   if (error instanceof AdminValidationError) {
@@ -51,10 +49,7 @@ export async function createInvitationAction(_: AdminActionState, formData: Form
       guests: names.map((name, index) => ({
         name,
         requiresRsvp: eligibility[index] === "true",
-        phone: "",
-        dietaryRestriction: "",
-        notes: "",
-        message: "",
+        ...emptyGuestDetails,
       })),
     }, getDb());
     invitationId = invitation.id;
@@ -82,7 +77,7 @@ export async function updateInvitationAction(id: string, _: AdminActionState, fo
 export async function createGuestAction(invitationId: string, _: AdminActionState, formData: FormData): Promise<AdminActionState> {
   await requireAdmin();
   try {
-    await createGuest(invitationId, fieldsFromFormData(formData), getDb());
+    await createGuest(invitationId, { ...adminGuestFieldsFromFormData(formData), ...emptyGuestDetails }, getDb());
     revalidatePath("/admin");
     revalidatePath("/admin/invitations");
     revalidatePath(`/admin/invitations/${invitationId}`);
@@ -95,7 +90,7 @@ export async function createGuestAction(invitationId: string, _: AdminActionStat
 export async function updateGuestAction(id: string, _: AdminActionState, formData: FormData): Promise<AdminActionState> {
   await requireAdmin();
   try {
-    const invitationId = await updateGuest(id, fieldsFromFormData(formData), getDb());
+    const invitationId = await updateGuest(id, adminGuestFieldsFromFormData(formData), getDb());
     revalidatePath("/admin");
     revalidatePath("/admin/invitations");
     revalidatePath(`/admin/invitations/${invitationId}`);

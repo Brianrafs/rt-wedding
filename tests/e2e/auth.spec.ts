@@ -4,6 +4,9 @@ test("invalid or absent sessions cannot access the protected admin", async ({ co
   await page.goto("/admin");
   await expect(page).toHaveURL(/\/admin\/login$/);
 
+  await page.goto("/admin/messages");
+  await expect(page).toHaveURL(/\/admin\/login$/);
+
   await context.addCookies([{ name: "rt_admin_session", value: "forged-session", url: baseURL! }]);
   await page.goto("/admin");
   await expect(page).toHaveURL(/\/admin\/login$/);

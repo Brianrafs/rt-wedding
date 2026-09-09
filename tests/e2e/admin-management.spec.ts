@@ -30,6 +30,10 @@ test("admin manages an invitation and its guests without database access", async
   await expect(page.getByText("Não precisa responder", { exact: true })).toBeVisible();
 
   const addGuest = page.getByRole("region", { name: "Adicionar convidado" });
+  await expect(addGuest.getByLabel("Telefone")).toHaveCount(0);
+  await expect(addGuest.getByLabel("Restrição alimentar")).toHaveCount(0);
+  await expect(addGuest.getByLabel("Observações")).toHaveCount(0);
+  await expect(addGuest.getByLabel("Mensagem aos noivos")).toHaveCount(0);
   await addGuest.getByLabel("Nome").fill(`Convidado C ${suffix}`);
   await addGuest.getByRole("button", { name: "Adicionar convidado" }).click();
   await expect(page.getByRole("heading", { name: `Convidado C ${suffix}`, level: 3 })).toBeVisible();

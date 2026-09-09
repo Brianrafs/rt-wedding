@@ -64,6 +64,13 @@ export async function submitRsvp(
       });
       if (updated.count !== 1) throw new RsvpError("CHANGED");
     }
+    const inheritedStatus = guests.some((guest) => guest.status === "CONFIRMED")
+      ? "CONFIRMED"
+      : "DECLINED";
+    await tx.guest.updateMany({
+      where: { invitationId: invitation.id, requiresRsvp: false },
+      data: { status: inheritedStatus, respondedAt },
+    });
     // A request that waited or crossed the deadline rolls back the whole group.
     assertRsvpOpen(deadline, now());
     return tx.invitation.findUniqueOrThrow({ where: { code }, select: publicInvitationSelect });
